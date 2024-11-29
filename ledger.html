@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Budget Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .current-balance { text-align: center; font-size: 24px; margin: 20px 0; }
+        .form-container { width: 80%; margin: auto; display: flex; flex-wrap: wrap; gap: 10px; }
+        .form-container input, .form-container select, .form-container button { padding: 10px; margin: 5px 0; flex: 1; }
+        .form-container button { cursor: pointer; flex: 0.2; }
+        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        button.action-btn { padding: 5px 10px; margin: 0 2px; }
+    </style>
+</head>
+<body>
+    <div class="current-balance">Current Balance: Rs 0.00</div>
+    <div class="form-container">
+        <input type="text" id="description" placeholder="Description" required>
+        <input type="number" id="amount" placeholder="Amount" step="0.01" required>
+        <select id="cashInOut" required>
+            <option value="In">Cash In</option>
+            <option value="Out">Cash Out</option>
+        </select>
+        <input type="date" id="date" required>
+        <input type="text" id="place" placeholder="Place" required>
+        <select id="responsiblePerson" required>
+            <option value="NM">NM</option>
+            <option value="BM">BM</option>
+            <option value="SM">SM</option>
+            <option value="YM">YM</option>
+        </select>
+        <button type="submit" id="addEntryBtn">Add Entry</button>
+    </div>
+    <table id="entriesTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Cash In/Out</th>
+                <th>Date</th>
+                <th>Place</th>
+                <th>Responsible Person</th>
+                <th>Entry Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiBaseUrl = 'https://sattvik-backend.onrender.com'; // Replace with your server's base URL
+        const tableBody = document.querySelector('#entriesTable tbody');
+        const balanceDisplay = document.querySelector('.current-balance');
+        let currentBalance = 0;
+
+        document.addEventListener('DOMContentLoaded', fetchEntries);
+
+        document.getElementById('addEntryBtn').addEventListener('click', async () => {
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const cashInOut = document.getElementById('cashInOut').value;
+            const date = document.getElementById('date').value;
+            const place = document.getElementById('place').value;
+            const responsiblePerson = document.getElementById('responsiblePerson').value;
+
+            if (!description || isNaN(amount) || !date || !place || !responsiblePerson) {
+                alert('Please fill in all fields!');
+                return;
+            }
+
+            const newEntry = { description, amount, cashInOut, date, place, responsiblePerson };
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/entries`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newEntry),
+                });
+                const savedEntry = await response.json();
+                appendEntryToTable(savedEntry);
+                currentBalance += cashInOut === 'In' ? amount : -amount;
+                updateBalanceDisplay();
+                resetForm();
+            } catch (err) {
+                console.error('Error adding entry:', err);
+            }
+        });
+
+        async function fetchEntries() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/entries`);
+                const entries = await response.json();
+                tableBody.innerHTML = '';
+                currentBalance = 0;
+                entries.forEach(entry => {
+                    appendEntryToTable(entry);
+                    currentBalance += entry.cashInOut === 'In' ? entry.amount : -entry.amount;
+                });
+                updateBalanceDisplay();
+            } catch (err) {
+                console.error('Error fetching entries:', err);
+            }
+        }
+
+        function appendEntryToTable(entry) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${entry._id}</td>
+                <td>${entry.description}</td>
+                <td>${entry.amount.toFixed(2)}</td>
+                <td>${entry.cashInOut}</td>
+                <td>${entry.date}</td>
+                <td>${entry.place}</td>
+                <td>${entry.responsiblePerson}</td>
+                <td>${new Date(entry.entryTime).toLocaleString()}</td>
+                <td>
+                    <button class="action-btn" onclick="editEntry('${entry._id}')">Edit</button>
+                    <button class="action-btn" onclick="deleteEntry('${entry._id}', ${entry.amount}, '${entry.cashInOut}')">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        }
+
+        function updateBalanceDisplay() {
+            balanceDisplay.textContent = `Current Balance: $${currentBalance.toFixed(2)}`;
+        }
+
+        function resetForm() {
+            document.getElementById('description').value = '';
+            document.getElementById('amount').value = '';
+            document.getElementById('cashInOut').value = 'In';
+            document.getElementById('date').value = '';
+            document.getElementById('place').value = '';
+            document.getElementById('responsiblePerson').value = 'NM';
+        }
+
+        async function deleteEntry(id, amount, cashInOut) {
+            try {
+                await fetch(`${apiBaseUrl}/entries/${id}`, { method: 'DELETE' });
+                currentBalance += cashInOut === 'In' ? -amount : amount;
+                updateBalanceDisplay();
+                fetchEntries();
+            } catch (err) {
+                console.error('Error deleting entry:', err);
+            }
+        }
+
+        async function editEntry(id) {
+            // Implement edit logic (similar to earlier example)
+        }
+<iframe src="https://your-iframe-source-url.com" sandbox="allow-scripts allow-same-origin allow-modals" width="600" height="400"></iframe>
+
+    </script>
+</body>
+</html>
