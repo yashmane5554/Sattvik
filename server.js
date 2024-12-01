@@ -9,9 +9,9 @@ const app = express();
 
 // CORS Configuration
 const corsOptions = {
-    origin: ['https://sattvikproteinfoods.in'], // Allow specific origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    origin: ['https://sattvikproteinfoods.in', 'http://localhost:3000'], // Allow production and local development origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -39,7 +39,7 @@ const entrySchema = new mongoose.Schema({
     description: { type: String, required: true },
     amount: { type: Number, required: true },
     cashInOut: { type: String, enum: ['cashIn', 'cashOut'], required: true },
-    date: { type: String, required: true },
+    date: { type: Date, required: true }, // Changed to Date type for better validation
     place: { type: String, required: true },
     responsiblePerson: { type: String, required: true },
     entryTime: { type: Date, default: Date.now }, // Automatically track entry time
@@ -47,7 +47,6 @@ const entrySchema = new mongoose.Schema({
 const Entry = mongoose.model('Entry', entrySchema);
 
 // Routes
-// Root Route
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -73,11 +72,19 @@ app.post('/entries', async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        const newEntry = new Entry(req.body);
+        const newEntry = new Entry({
+            description,
+            amount,
+            cashInOut,
+            date: new Date(date), // Convert to Date object
+            place,
+            responsiblePerson,
+        });
+
         const savedEntry = await newEntry.save();
         res.status(201).json(savedEntry);
     } catch (err) {
-        console.error('Error saving entry:', err.message);
+        console.error('Error saving entry:', err.message, err.errors);
         res.status(500).json({ error: 'Failed to save entry', details: err.message });
     }
 });
@@ -95,7 +102,7 @@ app.put('/entries/:id', async (req, res) => {
         }
         res.status(200).json(updatedEntry);
     } catch (err) {
-        console.error('Error updating entry:', err.message);
+        console.error('Error updating entry:', err.message, err.errors);
         res.status(500).json({ error: 'Failed to update entry', details: err.message });
     }
 });
@@ -115,13 +122,11 @@ app.delete('/entries/:id', async (req, res) => {
     }
 });
 
-// Handle 404 for invalid routes
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
-
 // Global Error Handling Middleware
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
+    if (err.name === 'ValidationError') {
+        return res.status(400).json({ error: 'Validation Error', details: err.errors });
+    }
     console.error('Unexpected error:', err);
     res.status(500).json({ error: 'Something went wrong', details: err.message });
 });

@@ -5,25 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Budget Tracker</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        .current-balance { text-align: center; font-size: 24px; margin: 20px 0; }
-        .form-container { width: 80%; margin: auto; display: flex; flex-wrap: wrap; gap: 10px; }
-        .form-container input, .form-container select, .form-container button { padding: 10px; margin: 5px 0; flex: 1; }
-        .form-container button { cursor: pointer; flex: 0.2; }
-        table { width: 90%; margin: 20px auto; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        button.action-btn { padding: 5px 10px; margin: 0 2px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .current-balance {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .form-container {
+            width: 80%;
+            margin: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-container input,
+        .form-container select,
+        .form-container button {
+            padding: 10px;
+            margin: 5px 0;
+            flex: 1;
+        }
+        .form-container button {
+            cursor: pointer;
+            flex: 0.2;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button.action-btn {
+            padding: 5px 10px;
+            margin: 0 2px;
+        }
     </style>
 </head>
 <body>
-    <div class="current-balance">Current Balance: Rs 0.00</div>
+    <div class="current-balance">Current Balance: ₹0.00</div>
     <div class="form-container">
         <input type="text" id="description" placeholder="Description" required>
         <input type="number" id="amount" placeholder="Amount" step="0.01" required>
         <select id="cashInOut" required>
-            <option value="In">Cash In</option>
-            <option value="Out">Cash Out</option>
+            <option value="in">Cash In</option>
+            <option value="out">Cash Out</option>
         </select>
         <input type="date" id="date" required>
         <input type="text" id="place" placeholder="Place" required>
@@ -53,7 +89,7 @@
     </table>
 
     <script>
-        const apiBaseUrl = 'https://sattvik-backend.onrender.com'; // Replace with your server's base URL
+        const apiBaseUrl = 'https://sattvik-backend.onrender.com'; // Replace with your actual API URL
         const tableBody = document.querySelector('#entriesTable tbody');
         const balanceDisplay = document.querySelector('.current-balance');
         let currentBalance = 0;
@@ -61,15 +97,16 @@
         document.addEventListener('DOMContentLoaded', fetchEntries);
 
         document.getElementById('addEntryBtn').addEventListener('click', async () => {
-            const description = document.getElementById('description').value;
+            const description = document.getElementById('description').value.trim();
             const amount = parseFloat(document.getElementById('amount').value);
             const cashInOut = document.getElementById('cashInOut').value;
             const date = document.getElementById('date').value;
-            const place = document.getElementById('place').value;
+            const place = document.getElementById('place').value.trim();
             const responsiblePerson = document.getElementById('responsiblePerson').value;
 
+            // Validate inputs
             if (!description || isNaN(amount) || !date || !place || !responsiblePerson) {
-                alert('Please fill in all fields!');
+                alert('Please fill in all fields correctly!');
                 return;
             }
 
@@ -81,29 +118,39 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newEntry),
                 });
+
+                if (!response.ok) throw new Error(`Failed to add entry. Status: ${response.status}`);
+
                 const savedEntry = await response.json();
                 appendEntryToTable(savedEntry);
-                currentBalance += cashInOut === 'In' ? amount : -amount;
+                currentBalance += cashInOut === 'in' ? amount : -amount;
                 updateBalanceDisplay();
                 resetForm();
             } catch (err) {
                 console.error('Error adding entry:', err);
+                alert('Failed to add entry. Please try again later.');
             }
         });
 
         async function fetchEntries() {
             try {
                 const response = await fetch(`${apiBaseUrl}/entries`);
+
+                if (!response.ok) throw new Error(`Failed to fetch entries. Status: ${response.status}`);
+
                 const entries = await response.json();
                 tableBody.innerHTML = '';
                 currentBalance = 0;
+
                 entries.forEach(entry => {
                     appendEntryToTable(entry);
-                    currentBalance += entry.cashInOut === 'In' ? entry.amount : -entry.amount;
+                    currentBalance += entry.cashInOut === 'in' ? entry.amount : -entry.amount;
                 });
+
                 updateBalanceDisplay();
             } catch (err) {
                 console.error('Error fetching entries:', err);
+                alert('Failed to fetch entries. Please try again later.');
             }
         }
 
@@ -112,7 +159,7 @@
             row.innerHTML = `
                 <td>${entry._id}</td>
                 <td>${entry.description}</td>
-                <td>${entry.amount.toFixed(2)}</td>
+                <td>₹${entry.amount.toFixed(2)}</td>
                 <td>${entry.cashInOut}</td>
                 <td>${entry.date}</td>
                 <td>${entry.place}</td>
@@ -127,13 +174,13 @@
         }
 
         function updateBalanceDisplay() {
-            balanceDisplay.textContent = `Current Balance: $${currentBalance.toFixed(2)}`;
+            balanceDisplay.textContent = `Current Balance: ₹${currentBalance.toFixed(2)}`;
         }
 
         function resetForm() {
             document.getElementById('description').value = '';
             document.getElementById('amount').value = '';
-            document.getElementById('cashInOut').value = 'In';
+            document.getElementById('cashInOut').value = 'in';
             document.getElementById('date').value = '';
             document.getElementById('place').value = '';
             document.getElementById('responsiblePerson').value = 'NM';
@@ -141,20 +188,22 @@
 
         async function deleteEntry(id, amount, cashInOut) {
             try {
-                await fetch(`${apiBaseUrl}/entries/${id}`, { method: 'DELETE' });
-                currentBalance += cashInOut === 'In' ? -amount : amount;
+                const response = await fetch(`${apiBaseUrl}/entries/${id}`, { method: 'DELETE' });
+
+                if (!response.ok) throw new Error(`Failed to delete entry. Status: ${response.status}`);
+
+                currentBalance += cashInOut === 'in' ? -amount : amount;
                 updateBalanceDisplay();
                 fetchEntries();
             } catch (err) {
                 console.error('Error deleting entry:', err);
+                alert('Failed to delete entry. Please try again later.');
             }
         }
 
         async function editEntry(id) {
-            // Implement edit logic (similar to earlier example)
+            alert(`Edit functionality for entry ${id} is not yet implemented.`);
         }
-<iframe src="https://your-iframe-source-url.com" sandbox="allow-scripts allow-same-origin allow-modals" width="600" height="400"></iframe>
-
     </script>
 </body>
 </html>
