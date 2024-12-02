@@ -26,14 +26,16 @@ db.once('open', () => {
 
 // Define Schema and Model
 const formSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  message: String,
+  description: String,
+  amount: Number,
+  cashType: String,
+  date: String,
+  place: String,
+  person: String,
+  createdAt: { type: Date, default: Date.now }, // Auto-generated timestamp
 });
 
 const Form = mongoose.model('Form', formSchema);
-
-// Routes
 
 // Save form data
 app.post('/api/submit', async (req, res) => {
@@ -55,6 +57,7 @@ app.get('/api/data', async (req, res) => {
     res.status(500).json({ message: 'Error fetching data', error });
   }
 });
+
 // Get Total Cash In Hand
 app.get('/api/cash-in-hand', async (req, res) => {
   try {
@@ -81,7 +84,7 @@ app.get('/api/cash-in-hand', async (req, res) => {
 
 
 // Start Server
-const PORT = process.env.PORT || 5000; // Adjust as necessary for your hosting platform
+const PORT = process.env.PORT || 5000; // Adjust as necessary
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

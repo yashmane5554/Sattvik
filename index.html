@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Form Website</title>
+  <title>Updated Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,6 +21,18 @@
       padding: 10px;
       text-align: left;
     }
+    form {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -28,17 +40,36 @@
     Total Cash in Hand: ₹0
   </div>
   
-  <h1>Simple Form</h1>
+  <h1>Updated Form</h1>
   <form id="form">
-    <label for="name">Name:</label><br>
-    <input type="text" id="name" name="name" required><br><br>
-    
-    <label for="email">Email:</label><br>
-    <input type="email" id="email" name="email" required><br><br>
-    
-    <label for="message">Message:</label><br>
-    <textarea id="message" name="message" rows="4" required></textarea><br><br>
-    
+    <label for="description">Description:</label>
+    <textarea id="description" name="description" rows="3" required></textarea>
+
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" name="amount" required>
+
+    <label for="cashType">Cash In/Cash Out:</label>
+    <select id="cashType" name="cashType" required>
+      <option value="" disabled selected>Select Type</option>
+      <option value="Cash In">Cash In</option>
+      <option value="Cash Out">Cash Out</option>
+    </select>
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <label for="place">Place:</label>
+    <input type="text" id="place" name="place" required>
+
+    <label for="person">Person:</label>
+    <select id="person" name="person" required>
+      <option value="" disabled selected>Select Person</option>
+      <option value="NM">NM</option>
+      <option value="BM">BM</option>
+      <option value="SM">SM</option>
+      <option value="YM">YM</option>
+    </select>
+
     <button type="submit">Submit</button>
   </form>
 
@@ -46,9 +77,13 @@
   <table>
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Message</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Cash Type</th>
+        <th>Date</th>
+        <th>Place</th>
+        <th>Person</th>
+        <th>Date and Time of Entry</th>
       </tr>
     </thead>
     <tbody id="data-table"></tbody>
@@ -56,7 +91,6 @@
 
   <script>
     const API_BASE_URL = 'https://sattvik-backend.onrender.com'; // Replace with your server URL
-
 
 const form = document.getElementById('form');
 const dataTable = document.getElementById('data-table');
@@ -113,6 +147,7 @@ form.addEventListener('submit', async (e) => {
 
 // Load data and cash in hand on page load
 fetchData();
+
   </script>
 </body>
 </html>
