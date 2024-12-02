@@ -55,6 +55,30 @@ app.get('/api/data', async (req, res) => {
     res.status(500).json({ message: 'Error fetching data', error });
   }
 });
+// Get Total Cash In Hand
+app.get('/api/cash-in-hand', async (req, res) => {
+  try {
+    const cashInTotal = await Form.aggregate([
+      { $match: { cashType: 'Cash In' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+
+    const cashOutTotal = await Form.aggregate([
+      { $match: { cashType: 'Cash Out' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+
+    const totalCashIn = cashInTotal[0]?.total || 0;
+    const totalCashOut = cashOutTotal[0]?.total || 0;
+
+    const cashInHand = totalCashIn - totalCashOut;
+
+    res.json({ cashInHand });
+  } catch (error) {
+    res.status(500).json({ message: 'Error calculating cash in hand', error });
+  }
+});
+
 
 // Start Server
 const PORT = process.env.PORT || 5000; // Adjust as necessary for your hosting platform

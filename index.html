@@ -24,6 +24,10 @@
   </style>
 </head>
 <body>
+  <div id="cash-in-hand" style="text-align: center; font-size: 1.5em; font-weight: bold; margin-bottom: 20px;">
+    Total Cash in Hand: ₹0
+  </div>
+  
   <h1>Simple Form</h1>
   <form id="form">
     <label for="name">Name:</label><br>
@@ -53,45 +57,62 @@
   <script>
     const API_BASE_URL = 'https://sattvik-backend.onrender.com'; // Replace with your server URL
 
-    const form = document.getElementById('form');
-    const dataTable = document.getElementById('data-table');
 
-    // Fetch data and populate the table
-    async function fetchData() {
-      const response = await fetch(`${API_BASE_URL}/api/data`);
-      const data = await response.json();
-      dataTable.innerHTML = data.map(entry => `
-        <tr>
-          <td>${entry.name}</td>
-          <td>${entry.email}</td>
-          <td>${entry.message}</td>
-        </tr>
-      `).join('');
-    }
+const form = document.getElementById('form');
+const dataTable = document.getElementById('data-table');
+const cashInHandDiv = document.getElementById('cash-in-hand');
 
-    // Submit form data
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = {
-        name: form.name.value,
-        email: form.email.value,
-        message: form.message.value,
-      };
+// Fetch and display Total Cash in Hand
+async function fetchCashInHand() {
+  const response = await fetch(`${API_BASE_URL}/api/cash-in-hand`);
+  const data = await response.json();
+  cashInHandDiv.textContent = `Total Cash in Hand: ₹${data.cashInHand}`;
+}
 
-      await fetch(`${API_BASE_URL}/api/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+// Fetch data and populate the table
+async function fetchData() {
+  const response = await fetch(`${API_BASE_URL}/api/data`);
+  const data = await response.json();
+  dataTable.innerHTML = data.map(entry => `
+    <tr>
+      <td>${entry.description}</td>
+      <td>${entry.amount}</td>
+      <td>${entry.cashType}</td>
+      <td>${entry.date}</td>
+      <td>${entry.place}</td>
+      <td>${entry.person}</td>
+      <td>${new Date(entry.createdAt).toLocaleString()}</td>
+    </tr>
+  `).join('');
+  fetchCashInHand(); // Update cash in hand after fetching data
+}
 
-      form.reset();
-      fetchData();
-    });
+// Submit form data
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = {
+    description: form.description.value,
+    amount: parseFloat(form.amount.value),
+    cashType: form.cashType.value,
+    date: form.date.value,
+    place: form.place.value,
+    person: form.person.value,
+  };
 
-    // Load data on page load
-    fetchData();
+  await fetch(`${API_BASE_URL}/api/submit`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  });
+
+  form.reset();
+  fetchData();
+});
+
+// Load data and cash in hand on page load
+fetchData();
   </script>
 </body>
 </html>
