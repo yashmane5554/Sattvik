@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Form Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Form</h1>
+  <form id="form">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
+    
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
+    
+    <label for="message">Message:</label><br>
+    <textarea id="message" name="message" rows="4" required></textarea><br><br>
+    
+    <button type="submit">Submit</button>
+  </form>
+
+  <h2>Submitted Data</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Message</th>
+      </tr>
+    </thead>
+    <tbody id="data-table"></tbody>
+  </table>
+
+  <script>
+    const API_BASE_URL = 'https://sattvik-backend.onrender.com'; // Replace with your server URL
+
+    const form = document.getElementById('form');
+    const dataTable = document.getElementById('data-table');
+
+    // Fetch data and populate the table
+    async function fetchData() {
+      const response = await fetch(`${API_BASE_URL}/api/data`);
+      const data = await response.json();
+      dataTable.innerHTML = data.map(entry => `
+        <tr>
+          <td>${entry.name}</td>
+          <td>${entry.email}</td>
+          <td>${entry.message}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Submit form data
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = {
+        name: form.name.value,
+        email: form.email.value,
+        message: form.message.value,
+      };
+
+      await fetch(`${API_BASE_URL}/api/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      form.reset();
+      fetchData();
+    });
+
+    // Load data on page load
+    fetchData();
+  </script>
+</body>
+</html>

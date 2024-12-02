@@ -123,7 +123,7 @@
 
                 const savedEntry = await response.json();
                 appendEntryToTable(savedEntry);
-                currentBalance += cashInOut === 'in' ? amount : -amount;
+                currentBalance += cashInOut === 'cashIn' ? amount : -amount;
                 updateBalanceDisplay();
                 resetForm();
             } catch (err) {
@@ -133,54 +133,58 @@
         });
 
         async function fetchEntries() {
-            try {
-                const response = await fetch(`${apiBaseUrl}/entries`);
+    try {
+        const response = await fetch(`${apiBaseUrl}/entries`);
 
-                if (!response.ok) throw new Error(`Failed to fetch entries. Status: ${response.status}`);
+        if (!response.ok) throw new Error(`Failed to fetch entries. Status: ${response.status}`);
 
-                const entries = await response.json();
-                tableBody.innerHTML = '';
-                currentBalance = 0;
+        const entries = await response.json();
+        tableBody.innerHTML = '';
+        currentBalance = 0;
 
-                entries.forEach(entry => {
-                    appendEntryToTable(entry);
-                    currentBalance += entry.cashInOut === 'in' ? entry.amount : -entry.amount;
-                });
+        entries.forEach(entry => {
+            // Append the entry to the table
+            appendEntryToTable(entry);
 
-                updateBalanceDisplay();
-            } catch (err) {
-                console.error('Error fetching entries:', err);
-                alert('Failed to fetch entries. Please try again later.');
-            }
-        }
+            // Calculate balance directly
+            currentBalance += entry.cashInOut === 'cashIn' ? parseFloat(entry.amount) : -parseFloat(entry.amount);
+        });
 
-        function appendEntryToTable(entry) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${entry._id}</td>
-                <td>${entry.description}</td>
-                <td>₹${entry.amount.toFixed(2)}</td>
-                <td>${entry.cashInOut}</td>
-                <td>${entry.date}</td>
-                <td>${entry.place}</td>
-                <td>${entry.responsiblePerson}</td>
-                <td>${new Date(entry.entryTime).toLocaleString()}</td>
-                <td>
-                    <button class="action-btn" onclick="editEntry('${entry._id}')">Edit</button>
-                    <button class="action-btn" onclick="deleteEntry('${entry._id}', ${entry.amount}, '${entry.cashInOut}')">Delete</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        }
+        updateBalanceDisplay();
+    } catch (err) {
+        console.error('Error fetching entries:', err);
+        alert('Failed to fetch entries. Please try again later.');
+    }
+}
 
-        function updateBalanceDisplay() {
-            balanceDisplay.textContent = `Current Balance: ₹${currentBalance.toFixed(2)}`;
-        }
+function appendEntryToTable(entry) {
+    const row = document.createElement('tr');
+    const entryTime = entry.entryTime ? new Date(entry.entryTime).toLocaleString() : 'N/A'; // Safely handle entryTime
+    row.innerHTML = `
+        <td>${entry._id}</td>
+        <td>${entry.description}</td>
+        <td>₹${parseFloat(entry.amount).toFixed(2)}</td>
+        <td>${entry.cashInOut}</td>
+        <td>${new Date(entry.date).toLocaleDateString()}</td>
+        <td>${entry.place}</td>
+        <td>${entry.responsiblePerson}</td>
+        <td>${entryTime}</td>
+        <td>
+            <button class="action-btn" onclick="deleteEntry('${entry._id}', ${entry.amount}, '${entry.cashInOut}')">Delete</button>
+        </td>
+    `;
+    tableBody.appendChild(row);
+}
+
+function updateBalanceDisplay() {
+    balanceDisplay.textContent = `Current Balance: ₹${currentBalance.toFixed(2)}`;
+}
+
 
         function resetForm() {
             document.getElementById('description').value = '';
             document.getElementById('amount').value = '';
-            document.getElementById('cashInOut').value = 'in';
+            document.getElementById('cashInOut').value = 'cashIn';
             document.getElementById('date').value = '';
             document.getElementById('place').value = '';
             document.getElementById('responsiblePerson').value = 'NM';
@@ -192,7 +196,7 @@
 
                 if (!response.ok) throw new Error(`Failed to delete entry. Status: ${response.status}`);
 
-                currentBalance += cashInOut === 'in' ? -amount : amount;
+                currentBalance += cashInOut === 'cashIn' ? -amount : amount;
                 updateBalanceDisplay();
                 fetchEntries();
             } catch (err) {
