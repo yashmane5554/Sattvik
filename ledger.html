@@ -1,213 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Budget Tracker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .current-balance {
-            text-align: center;
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        .form-container {
-            width: 80%;
-            margin: auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .form-container input,
-        .form-container select,
-        .form-container button {
-            padding: 10px;
-            margin: 5px 0;
-            flex: 1;
-        }
-        .form-container button {
-            cursor: pointer;
-            flex: 0.2;
-        }
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        button.action-btn {
-            padding: 5px 10px;
-            margin: 0 2px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash Entry Form</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="current-balance">Current Balance: ₹0.00</div>
-    <div class="form-container">
-        <input type="text" id="description" placeholder="Description" required>
-        <input type="number" id="amount" placeholder="Amount" step="0.01" required>
-        <select id="cashInOut" required>
-            <option value="in">Cash In</option>
-            <option value="out">Cash Out</option>
-        </select>
-        <input type="date" id="date" required>
-        <input type="text" id="place" placeholder="Place" required>
-        <select id="responsiblePerson" required>
-            <option value="NM">NM</option>
-            <option value="BM">BM</option>
-            <option value="SM">SM</option>
-            <option value="YM">YM</option>
-        </select>
-        <button type="submit" id="addEntryBtn">Add Entry</button>
+<div class="login-root">
+  <div class="box-root flex-flex flex-direction--column" style="min-height: 100vh; flex-grow: 1;">
+    <div class="loginbackground box-background--white padding-top--64">
+      <div class="loginbackground-gridContainer">
+        <!-- Background animation remains unchanged -->
+      </div>
     </div>
-    <table id="entriesTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Cash In/Out</th>
-                <th>Date</th>
-                <th>Place</th>
-                <th>Responsible Person</th>
-                <th>Entry Time</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="box-root padding-top--24 flex-flex flex-direction--column" style="flex-grow: 1; z-index: 9;">
+      <div class="box-root padding-top--48 padding-bottom--24 flex-flex flex-justifyContent--center">
+        <h1><a href="#" rel="dofollow">Cash Manager</a></h1>
+      </div>
+      <div class="formbg-outer">
+        <div class="formbg">
+          <div class="formbg-inner padding-horizontal--48">
+            <span class="padding-bottom--15">Enter Cash Details</span>
+            <form id="cash-form">
+              <div class="field padding-bottom--24">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" required>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" name="amount" required>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="cashType">Cash In/Cash Out</label>
+                <select id="cashType" name="cashType" required>
+                  <option value="cash_in">Cash In</option>
+                  <option value="cash_out">Cash Out</option>
+                </select>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="place">Place</label>
+                <input type="text" id="place" name="place" required>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="person">Person</label>
+                <select id="person" name="person" required>
+                  <option value="NM">NM</option>
+                  <option value="BM">BM</option>
+                  <option value="SM">SM</option>
+                  <option value="YM">YM</option>
+                </select>
+              </div>
+              <div class="field padding-bottom--24">
+                <label for="entryDateTime">Date and Time of Entry</label>
+                <input type="text" id="entryDateTime" name="entryDateTime" readonly>
+              </div>
+              <div class="field padding-bottom--24">
+                <input type="submit" value="Submit">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="footer-link padding-top--24">
+          <span>Total Cash in Hand: <span id="cashInHand">$0.00</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const dateTimeField = document.getElementById("entryDateTime");
+    dateTimeField.value = new Date().toLocaleString();
+  });
+    const API_BASE_URL = 'https://sattvik-backend.onrender.com'; // Replace with your server URL
 
-    <script>
-        const apiBaseUrl = 'https://sattvik-backend.onrender.com'; // Replace with your actual API URL
-        const tableBody = document.querySelector('#entriesTable tbody');
-        const balanceDisplay = document.querySelector('.current-balance');
-        let currentBalance = 0;
+    const form = document.getElementById('form');
+    const dataTable = document.getElementById('data-table');
+    const cashInHandDiv = document.getElementById('cash-in-hand');
 
-        document.addEventListener('DOMContentLoaded', fetchEntries);
-
-        document.getElementById('addEntryBtn').addEventListener('click', async () => {
-            const description = document.getElementById('description').value.trim();
-            const amount = parseFloat(document.getElementById('amount').value);
-            const cashInOut = document.getElementById('cashInOut').value;
-            const date = document.getElementById('date').value;
-            const place = document.getElementById('place').value.trim();
-            const responsiblePerson = document.getElementById('responsiblePerson').value;
-
-            // Validate inputs
-            if (!description || isNaN(amount) || !date || !place || !responsiblePerson) {
-                alert('Please fill in all fields correctly!');
-                return;
-            }
-
-            const newEntry = { description, amount, cashInOut, date, place, responsiblePerson };
-
-            try {
-                const response = await fetch(`${apiBaseUrl}/entries`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newEntry),
-                });
-
-                if (!response.ok) throw new Error(`Failed to add entry. Status: ${response.status}`);
-
-                const savedEntry = await response.json();
-                appendEntryToTable(savedEntry);
-                currentBalance += cashInOut === 'cashIn' ? amount : -amount;
-                updateBalanceDisplay();
-                resetForm();
-            } catch (err) {
-                console.error('Error adding entry:', err);
-                alert('Failed to add entry. Please try again later.');
-            }
-        });
-
-        async function fetchEntries() {
-    try {
-        const response = await fetch(`${apiBaseUrl}/entries`);
-
-        if (!response.ok) throw new Error(`Failed to fetch entries. Status: ${response.status}`);
-
-        const entries = await response.json();
-        tableBody.innerHTML = '';
-        currentBalance = 0;
-
-        entries.forEach(entry => {
-            // Append the entry to the table
-            appendEntryToTable(entry);
-
-            // Calculate balance directly
-            currentBalance += entry.cashInOut === 'cashIn' ? parseFloat(entry.amount) : -parseFloat(entry.amount);
-        });
-
-        updateBalanceDisplay();
-    } catch (err) {
-        console.error('Error fetching entries:', err);
-        alert('Failed to fetch entries. Please try again later.');
+    // Fetch and display Total Cash in Hand
+    async function fetchCashInHand() {
+      const response = await fetch(`${API_BASE_URL}/api/cash-in-hand`);
+      const data = await response.json();
+      cashInHandDiv.textContent = `Total Cash in Hand: ₹${data.cashInHand}`;
     }
-}
 
-function appendEntryToTable(entry) {
-    const row = document.createElement('tr');
-    const entryTime = entry.entryTime ? new Date(entry.entryTime).toLocaleString() : 'N/A'; // Safely handle entryTime
-    row.innerHTML = `
-        <td>${entry._id}</td>
-        <td>${entry.description}</td>
-        <td>₹${parseFloat(entry.amount).toFixed(2)}</td>
-        <td>${entry.cashInOut}</td>
-        <td>${new Date(entry.date).toLocaleDateString()}</td>
-        <td>${entry.place}</td>
-        <td>${entry.responsiblePerson}</td>
-        <td>${entryTime}</td>
-        <td>
-            <button class="action-btn" onclick="deleteEntry('${entry._id}', ${entry.amount}, '${entry.cashInOut}')">Delete</button>
-        </td>
-    `;
-    tableBody.appendChild(row);
-}
+    // Fetch data and populate the table
+    async function fetchData() {
+      const response = await fetch(`${API_BASE_URL}/api/data`);
+      const data = await response.json();
+      dataTable.innerHTML = data.map(entry => `
+        <tr>
+          <td>${entry.description}</td>
+          <td>${entry.amount}</td>
+          <td>${entry.cashType}</td>
+          <td>${entry.date}</td>
+          <td>${entry.place}</td>
+          <td>${entry.person}</td>
+          <td>${new Date(entry.createdAt).toLocaleString()}</td>
+        </tr>
+      `).join('');
+      fetchCashInHand(); // Update cash in hand after fetching data
+    }
 
-function updateBalanceDisplay() {
-    balanceDisplay.textContent = `Current Balance: ₹${currentBalance.toFixed(2)}`;
-}
+    // Submit form data
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = {
+        description: form.description.value,
+        amount: parseFloat(form.amount.value),
+        cashType: form.cashType.value,
+        date: form.date.value,
+        place: form.place.value,
+        person: form.person.value,
+      };
 
+      await fetch(`${API_BASE_URL}/api/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-        function resetForm() {
-            document.getElementById('description').value = '';
-            document.getElementById('amount').value = '';
-            document.getElementById('cashInOut').value = 'cashIn';
-            document.getElementById('date').value = '';
-            document.getElementById('place').value = '';
-            document.getElementById('responsiblePerson').value = 'NM';
-        }
+      form.reset();
+      fetchData();
+    });
 
-        async function deleteEntry(id, amount, cashInOut) {
-            try {
-                const response = await fetch(`${apiBaseUrl}/entries/${id}`, { method: 'DELETE' });
-
-                if (!response.ok) throw new Error(`Failed to delete entry. Status: ${response.status}`);
-
-                currentBalance += cashInOut === 'cashIn' ? -amount : amount;
-                updateBalanceDisplay();
-                fetchEntries();
-            } catch (err) {
-                console.error('Error deleting entry:', err);
-                alert('Failed to delete entry. Please try again later.');
-            }
-        }
-
-        async function editEntry(id) {
-            alert(`Edit functionality for entry ${id} is not yet implemented.`);
-        }
-    </script>
+    // Load data and cash in hand on page load
+    fetchData();
+  </script>
 </body>
 </html>

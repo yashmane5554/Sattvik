@@ -3,151 +3,219 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Updated Form</title>
+  <title>Cash Management</title>
   <style>
+    /* General Page Styling */
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      font-family: 'Arial', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
     }
+    header {
+      background: #007BFF;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      font-size: 2em;
+      font-weight: bold;
+    }
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    #cash-in-hand {
+      text-align: center;
+      font-size: 1.8em;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #007BFF;
+    }
+
+    /* Form Styling */
+    form {
+      display: grid;
+      gap: 15px;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input, select, textarea, button {
+      font-size: 1em;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    textarea {
+      resize: vertical;
+    }
+    button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+
+    /* Table Styling */
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-    table, th, td {
-      border: 1px solid black;
-    }
     th, td {
-      padding: 10px;
+      padding: 15px;
       text-align: left;
+      border: 1px solid #ddd;
     }
-    form {
-      margin-bottom: 20px;
+    th {
+      background: #007BFF;
+      color: #fff;
     }
-    label {
-      display: block;
-      margin: 5px 0;
+    tr:nth-child(even) {
+      background: #f2f2f2;
     }
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      main {
+        padding: 10px;
+      }
+      table {
+        font-size: 0.9em;
+      }
+      button {
+        font-size: 0.9em;
+        padding: 8px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="cash-in-hand" style="text-align: center; font-size: 1.5em; font-weight: bold; margin-bottom: 20px;">
-    Total Cash in Hand: ₹0
-  </div>
-  
-  <h1>Updated Form</h1>
-  <form id="form">
-    <label for="description">Description:</label>
-    <textarea id="description" name="description" rows="3" required></textarea>
-
-    <label for="amount">Amount:</label>
-    <input type="number" id="amount" name="amount" required>
-
-    <label for="cashType">Cash In/Cash Out:</label>
-    <select id="cashType" name="cashType" required>
-      <option value="" disabled selected>Select Type</option>
-      <option value="Cash In">Cash In</option>
-      <option value="Cash Out">Cash Out</option>
-    </select>
-
-    <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required>
-
-    <label for="place">Place:</label>
-    <input type="text" id="place" name="place" required>
-
-    <label for="person">Person:</label>
-    <select id="person" name="person" required>
-      <option value="" disabled selected>Select Person</option>
-      <option value="NM">NM</option>
-      <option value="BM">BM</option>
-      <option value="SM">SM</option>
-      <option value="YM">YM</option>
-    </select>
-
-    <button type="submit">Submit</button>
-  </form>
-
-  <h2>Submitted Data</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Description</th>
-        <th>Amount</th>
-        <th>Cash Type</th>
-        <th>Date</th>
-        <th>Place</th>
-        <th>Person</th>
-        <th>Date and Time of Entry</th>
-      </tr>
-    </thead>
-    <tbody id="data-table"></tbody>
-  </table>
-
+  <header>Cash Management System</header>
+  <main>
+    <div id="cash-in-hand">Total Cash in Hand: ₹0</div>
+    <form id="form">
+      <div>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="3" placeholder="Enter transaction description" required></textarea>
+      </div>
+      <div>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+      </div>
+      <div>
+        <label for="cashType">Cash In/Cash Out:</label>
+        <select id="cashType" name="cashType" required>
+          <option value="" disabled selected>Select Type</option>
+          <option value="Cash In">Cash In</option>
+          <option value="Cash Out">Cash Out</option>
+        </select>
+      </div>
+      <div>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+      </div>
+      <div>
+        <label for="place">Place:</label>
+        <input type="text" id="place" name="place" placeholder="Enter place" required>
+      </div>
+      <div>
+        <label for="person">Person:</label>
+        <select id="person" name="person" required>
+          <option value="" disabled selected>Select Person</option>
+          <option value="NM">NM</option>
+          <option value="BM">BM</option>
+          <option value="SM">SM</option>
+          <option value="YM">YM</option>
+        </select>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+    <h2>Submitted Transactions</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Cash Type</th>
+          <th>Date</th>
+          <th>Place</th>
+          <th>Person</th>
+          <th>Date and Time of Entry</th>
+        </tr>
+      </thead>
+      <tbody id="data-table"></tbody>
+    </table>
+  </main>
   <script>
     const API_BASE_URL = 'https://sattvik-backend.onrender.com'; // Replace with your server URL
 
-const form = document.getElementById('form');
-const dataTable = document.getElementById('data-table');
-const cashInHandDiv = document.getElementById('cash-in-hand');
+    const form = document.getElementById('form');
+    const dataTable = document.getElementById('data-table');
+    const cashInHandDiv = document.getElementById('cash-in-hand');
 
-// Fetch and display Total Cash in Hand
-async function fetchCashInHand() {
-  const response = await fetch(`${API_BASE_URL}/api/cash-in-hand`);
-  const data = await response.json();
-  cashInHandDiv.textContent = `Total Cash in Hand: ₹${data.cashInHand}`;
-}
+    // Fetch and display Total Cash in Hand
+    async function fetchCashInHand() {
+      const response = await fetch(`${API_BASE_URL}/api/cash-in-hand`);
+      const data = await response.json();
+      cashInHandDiv.textContent = `Total Cash in Hand: ₹${data.cashInHand}`;
+    }
 
-// Fetch data and populate the table
-async function fetchData() {
-  const response = await fetch(`${API_BASE_URL}/api/data`);
-  const data = await response.json();
-  dataTable.innerHTML = data.map(entry => `
-    <tr>
-      <td>${entry.description}</td>
-      <td>${entry.amount}</td>
-      <td>${entry.cashType}</td>
-      <td>${entry.date}</td>
-      <td>${entry.place}</td>
-      <td>${entry.person}</td>
-      <td>${new Date(entry.createdAt).toLocaleString()}</td>
-    </tr>
-  `).join('');
-  fetchCashInHand(); // Update cash in hand after fetching data
-}
+    // Fetch data and populate the table
+    async function fetchData() {
+      const response = await fetch(`${API_BASE_URL}/api/data`);
+      const data = await response.json();
+      dataTable.innerHTML = data.map(entry => `
+        <tr>
+          <td>${entry.description}</td>
+          <td>${entry.amount}</td>
+          <td>${entry.cashType}</td>
+          <td>${entry.date}</td>
+          <td>${entry.place}</td>
+          <td>${entry.person}</td>
+          <td>${new Date(entry.createdAt).toLocaleString()}</td>
+        </tr>
+      `).join('');
+      fetchCashInHand(); // Update cash in hand after fetching data
+    }
 
-// Submit form data
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = {
-    description: form.description.value,
-    amount: parseFloat(form.amount.value),
-    cashType: form.cashType.value,
-    date: form.date.value,
-    place: form.place.value,
-    person: form.person.value,
-  };
+    // Submit form data
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = {
+        description: form.description.value,
+        amount: parseFloat(form.amount.value),
+        cashType: form.cashType.value,
+        date: form.date.value,
+        place: form.place.value,
+        person: form.person.value,
+      };
 
-  await fetch(`${API_BASE_URL}/api/submit`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  });
+      await fetch(`${API_BASE_URL}/api/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-  form.reset();
-  fetchData();
-});
+      form.reset();
+      fetchData();
+    });
 
-// Load data and cash in hand on page load
-fetchData();
-
+    // Load data and cash in hand on page load
+    fetchData();
   </script>
 </body>
 </html>

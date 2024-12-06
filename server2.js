@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://sattvikproteinfoods.in', // Replace with your website's domain
+  origin: 'https://yellow-alene-40.tiiny.site/', // Replace with your website's domain
   methods: ['GET', 'POST'],
 }));
 app.use(bodyParser.json());
